@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<!-- saved from url=(0048)https://app.onecompiler.com/43rcefr3g_43rebsknk/ -->
+<html lang="vi"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ÔN TẬP TRUYỀN HÌNH CƠ ĐỘNG</title>
+  <link href="./css2" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 960px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+      color: #007bff;
+    }
+    
+    
+     .result-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 20px 0;
+    }
+    .result-box {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+    }
+    .correct-box { background: green; }
+    .incorrect-box { background: red; }
+    .question-block {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-left: 4px solid #007bff;
+      border-radius: 6px;
+    }
+    .hidden { display: none; }
+    .show-all-btn {
+      margin-top: 10px;
+      background-color: #555;
+    }
+    
+    
+    
+    
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      margin: 0 5px;
+      border: none;
+      background: #e0e0e0;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: #007bff;
+      color: #fff;
+    }
+    .hidden { display: none; }
+    select, button {
+      padding: 10px 15px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .question-block {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-left: 4px solid #007bff;
+      border-radius: 6px;
+    }
+    .option { margin: 8px 0; display: block; }
+    .correct { color: green; font-weight: bold; }
+    .incorrect { color: red; font-weight: bold; }
+    
+    .timer {
+      font-weight: bold;
+      color: #c62828;
+      background: #fff3e0;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ÔN TẬP TRUYỀN HÌNH CƠ ĐỘNG</h1>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(&#39;practice&#39;)">Ôn Tập</button>
+      <button class="tab-btn" onclick="switchTab(&#39;test&#39;)">Kiểm Tra</button>
+    </div>
+
+    <!-- Ôn Tập -->
+    <div id="practice-tab">
+      <h3>Chọn chủ đề để ôn tập:</h3>
+      <select id="topic-select">
+        <option value="">-- Chọn chủ đề --</option>
+        <option value="audio">Âm thanh</option>
+        <option value="camera">Camera IP</option>
+        <option value="led">Màn hình LED</option>
+        <option value="mcu">MCU PEXIP</option>
+        <option value="truyendan">Truyền dẫn</option>
+        <option value="router">Tủ truyền hình</option>
+      </select>
+      <br>
+      <button onclick="startPractice()">Bắt đầu ôn tập</button>
+    </div>
+
+    <!-- Kiểm Tra -->
+    <div id="test-tab" class="hidden">
+      <h3>Bài kiểm tra tổng hợp (50 câu ngẫu nhiên)</h3>
+      <button onclick="startTest()">Bắt đầu kiểm tra</button>
+    </div>
+
+    <!-- Giao diện làm bài -->
+    <div id="quiz-screen" class="hidden">
+      <div class="timer" id="timer" style="display:none;"></div>
+      <form id="quiz-form"></form>
+      <button onclick="submitQuiz()">Nộp bài</button>
+    </div>
+
+    <!-- Giao diện kết quả -->
+    <div id="result-screen" class="hidden">
+    <h2>Kết quả</h2>
+    <p id="score"></p>
+
+      <!-- Lưới kết quả các ô vuông -->
+      <div class="result-grid" id="result-grid"></div>
+
+        <!-- Nút hiện tất cả câu hỏi -->
+        <button class="show-all-btn" onclick="showAllQuestions()">Hiện tất cả câu hỏi</button>
+
+        <!-- Review từng câu hỏi -->
+        <div id="review"></div>
+      </div>
+
+   
+
+<script>
+const allQuestions = {
+ audio: [
+    {
+      question: "Thiết bị nào đảm nhận vai trò giám sát và điều khiển toàn bộ hệ thống âm thanh hội thảo?",
+      options: [
+        "a. Loa VXS5",
+        "b. CCSD-CURD",
+        "c. Micro E835S"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Chức năng chính của thiết bị CCSD-DL EU là gì?",
+      options: [
+        "a. Phát nhạc nền",
+        "b. Tham gia thảo luận và nghe nội dung",
+        "c. Chống hú"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Dây cáp LBB4116/10 có công dụng gì?",
+      options: [
+        "a. Kết nối loa với Amply",
+        "b. Kết nối thiết bị đại biểu và bộ trung tâm",
+        "c. Kết nối micro có dây cầm tay E835S"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Thiết bị chống phản hồi SR-1604 có chức năng gì?",
+      options: [
+        "a. Tăng bass",
+        "b. Giảm hú và phản hồi âm",
+        "c. Thu âm trực tiếp"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Chức năng của âm ly kèm trộn PM502 là gì?",
+      options: [
+        "a. Chỉ khuếch đại tín hiệu",
+        "b. Trộn và khuếch đại tín hiệu âm thanh",
+        "c. Ghi âm vào USB"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Loa VXS5 có công suất liên tục là bao nhiêu?",
+      options: [
+        "a. 50W",
+        "b. 75W",
+        "c. 150W"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Mixer Yamaha TF Series hỗ trợ điều khiển qua thiết bị nào?",
+      options: [
+        "a. PC/iPad/Smartphone",
+        "b. Chỉ bằng nút bấm cơ",
+        "c. Chỉ máy tính PC"
+      ],
+      answer: "a"
+    },
+    {
+      question: "TF Series sử dụng loại giao diện điều khiển nào?",
+      options: [
+        "a. Chuột",
+        "b. TouchFlow Operation",
+        "c. Bàn phím"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Loa kiểm âm Yamaha HS8 tái tạo âm thanh như thế nào?",
+      options: [
+        "a. Trung thực và chính xác",
+        "b. Thêm hiệu ứng surround",
+        "c. Tăng âm bass tối đa"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Bộ trung tâm hội thảo CCSD-CURD sử dụng bộ cấp nguồn Adaptor có điện áp nào ?",
+      options: [
+        "a. 2V DC",
+        "b. 24V DC",
+        "c. 48V DC"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Mixer TF Series có thể ghi âm thông qua?",
+      options: [
+        "a. Cổng quang",
+        "b. USB hoặc DAW",
+        "c. Bluetooth"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Thiết bị nào nên được bật sau cùng trong quy trình bật nguồn hệ thống âm thanh?",
+      options: [
+        "a. Mixer",
+        "b. Thiết bị đầu vào",
+        "c. Thiết bị công suất (Mixer liền công suất PM502)"
+      ],
+      answer: "c"
+    },
+    {
+      question: "Cáp tín hiệu bị nhiễu điện từ có thể gây lỗi gì?",
+      options: [
+        "a. Tăng âm lượng",
+        "b. Nhiễu, rè, méo tiếng",
+        "c. Không lên nguồn"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Đâu là cách khắc phục tình trạng micro hội thảo CCS1000D không hoạt động ?",
+      options: [
+        "a. Tăng âm lượng mixer",
+        "b. Kiểm tra đèn báo & kết nối dây",
+        "c. Tắt nguồn hệ thống"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Gain đầu vào quá cao có thể gây ra hiện tượng gì?",
+      options: [
+        "a. Bass mạnh",
+        "b. Clipping, méo tiếng",
+        "c. Tiếng trong rõ hơn"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Dấu hiệu nào cho thấy hệ thống không được tiếp địa đúng cách?",
+      options: [
+        "a. Không có tiếng",
+        "b. Tiếng ù (hum)",
+        "c. Volume nhỏ"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Khi loa chỉ phát tiếng 1 bên, nguyên nhân có thể là gì?",
+      options: [
+        "a. Pan lệch hoàn toàn",
+        "b. Gain quá cao",
+        "c. EQ quá thấp"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Một trong các lý do khiến mixer bị treo là gì?",
+      options: [
+        "a. Sử dụng preset sai",
+        "b. Nguồn không ổn định",
+        "c. Gain quá nhỏ"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Bước đầu tiên khi bật hệ thống âm thanh là gì?",
+      options: [
+        "a. Bật nguồn loa",
+        "b. Kiểm tra volume đưa về mức thấp nhất",
+        "c. Bật micro"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Nguyên nhân nào gây tiếng vọng (echo) hoặc hú?",
+      options: [
+        "a. Micro gần loa",
+        "b. Volume thấp",
+        "c. Nguồn điện yếu"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Một nguyên nhân khiến không ghi âm được vào USB trên thiết bị trung tâm CCS-1000D là gì?",
+      options: [
+        "a. USB định dạng NTFS",
+        "b. USB quá nhỏ",
+        "c. USB đang chạy ẩ"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Thiết bị nào hỗ trợ tính năng QuickPro Presets?",
+      options: [
+        "a. Micro có dây",
+        "b. Loa kiểm âm",
+        "c. Mixer Yamaha TF Series"
+      ],
+      answer: "c"
+    },
+    {
+      question: "Loa kiểm âm HS8 kết nối bằng cổng nào?",
+      options: [
+        "a. HDMI",
+        "b. XLR/TRS",
+        "c. USB"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Thiết bị nào cần vệ sinh bằng chổi lông mềm và khí nén nhẹ?",
+      options: [
+        "a. Micro",
+        "b. Mixer Yamaha TF Series",
+        "c. Tai nghe"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Bộ chống hú hoạt động hiệu quả khi nào?",
+      options: [
+        "a. Khi âm lượng tổng lớn",
+        "b. Khi hệ thống được căn chỉnh tối ưu",
+        "c. Khi dùng micro wireless"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Mỗi lần bảo trì định kỳ nên thực hiện theo tần suất nào?",
+      options: [
+        "a. 1 tháng 1 lần",
+        "b. 3 tháng 1 lần",
+        "c. 6 tháng hoặc 12 tháng 1 lần (tuỳ vào điều kiện môi trường)"
+      ],
+      answer: "c"
+    },
+    {
+      question: "TF Series sử dụng loại giao diện điều khiển nào?",
+      options: [
+        "a. Chuột",
+        "b. TouchFlow Operation",
+        "c. Bàn phím"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Trong cấu hình triển khai hệ thống thì bàn trộn TF3 bố trí ở đâu",
+      options: [
+        "a. Gần sân khấu",
+        "b. Bên cạnh hệ thống tủ truyền hình",
+        "c. Bố trí trong hội trường."
+      ],
+      answer: "b"
+    },
+    {
+      question: "Trong tình huống triển khai thực tế thì âm thanh từ Laptop phát video sẽ được đưa vào tủ nào?",
+      options: [
+        "a. Tủ 1",
+        "b. Tủ 2",
+        "c. Cả hai tủ"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Trong tình huống triển khai thực tế thì âm thanh vào và ra của VCS trung tâm sẽ kết nối trực tiếp vào bàn trộn nào?",
+      options: [
+        "a. TF1",
+        "b. TF3",
+        "c. Cả hai phương án trên"
+      ],
+      answer: "b"
+    }
+  ],
+  camera: [
+    {
+      question: "Dữ liệu camera sẽ được lưu trữ ở đâu.",
+      options: [
+        "a. Máy chủ",
+        "b. Máy tính client",
+        "c. Cả A và B đều đúng"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Dữ liệu luồng từ camera vào phần mềm là luồng nào",
+      options: [
+        "a. Stream 1",
+        "b. Stream 2",
+        "c. Stream 3"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Máy tính nào sẽ kết nối đến bàn điều khiển PTZ để điều khiển",
+      options: [
+        "a. Máy chủ",
+        "b. Máy tính client",
+        "c. Máy tính cài phần mềm JoystickServiceMonitor có cấu hình kết nối đến bàn PTZ"
+      ],
+      answer: "c"
+    },
+    {
+      question: "Chỉnh thông số tên camera, ngày giờ và hiển thị nó lên camera sẽ chỉnh ở đâu",
+      options: [
+        "a. Camera",
+        "b. Phần mềm",
+        "c. Tool cấu hình"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Phần mềm để cấu hình và xem camera là gì:",
+      options: [
+        "a. VIMonitorPlus",
+        "b. JoystickServiceMonitor",
+        "c. Service Manager"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Bạn sẽ add camera theo model nào:",
+      options: [
+        "a. ONVIF",
+        "b. ManualFacturer: Panasonic / Model: WV-X6533L",
+        "c. Dùng cách khác"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Cú pháp chọn Camera để điều khiển trên bàn điều khiển PTZ là:",
+      options: [
+        "a. [ ID camera ] + CAM/SET sau đó điều khiển camera.",
+        "b. Chỉ cần nhập [ ID camera ] sau đó điều khiển camera.",
+        "c. 0 + [ MON ] + [ ID camera ] + CAM/SET sau đó điều khiển camera."
+      ],
+      answer: "c"
+    },
+    {
+      question: "Khi khai báo bàn điều khiển PTZ sẽ chọn model nào sau đây:",
+      options: [
+        "a. WV-CU950",
+        "b. WV-CU980",
+        "c. WV-CU980 (China)"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Chế độ zoom của camera phóng to lên được bao nhiêu lần",
+      options: [
+        "a. 30",
+        "b. 60",
+        "c. 90"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Sau khi khai báo bàn điều khiển PTZ vào phần mềm cần tắt tường lửa hoặc mở port nào để kết nối máy tính đến bàn điều khiển PTZ",
+      options: [
+        "a. 7400",
+        "b. 7401",
+        "c. 7402"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Điện áp từ bộ Adaptor cấp cho Camera IP là bao nhiêu?",
+      options: [
+        "a. 12 VDC",
+        "b. 20 VAC",
+        "c. 220 VAC"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Hình ảnh của Camera IP đưa và hệ thống xử lý hình ảnh GO bằng cách nào?",
+      options: [
+        "a. Đường Sub stream",
+        "b. Xuất hình từ HDMI của Laptop điều khiển",
+        "c. Có thể sử dụng cả hai phương án trên"
+      ],
+      answer: "c"
+    }
+  ],
+  led: [
+    {
+      question: "Hệ thống màn hình LED bao gồm?",
+      options: [
+        "a. Cabinet, hệ khung, bộ xử lý hình ảnh, bộ chuyển đổi quang",
+        "b. Cabinet, bộ xử lý hình ảnh, camera IP, bộ chuyển đổi quang",
+        "c. Cabinet, MCU, hệ khung, bộ xử lý hình ảnh"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Kích thước tiêu chuẩn của một Cabinet LED được sử dụng là bao nhiêu?",
+      options: [
+        "a. 400 x 400 mm",
+        "b. 500 x 500 mm",
+        "c. 600 x 600 mm"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Bộ xử lý HI-2KP có thể điều khiển tối đa bao nhiêu pixel?",
+      options: [
+        "a. 6.5 triệu pixel",
+        "b. 8.4 triệu pixel",
+        "c. 10.4 triệu pixel"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Tác dụng chính của bộ chuyển đổi quang trong hệ thống là gì?",
+      options: [
+        "a. Tăng cường độ sáng",
+        "b. Kết nối máy tính với màn hình",
+        "c. Truyền tín hiệu xa hơn mà ít bị suy hao"
+      ],
+      answer: "c"
+    },
+    {
+      question: "Bộ phận nào trong Cabinet LED có nhiệm vụ tiếp nhận và xử lý dữ liệu hiển thị?",
+      options: [
+        "a. Bộ chuyển nguồn",
+        "b. Card thu tín hiệu",
+        "c. Module LED"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Số lượng cabinet tối đa một lộ mạng có thể quản lý là bao nhiêu? (P3.9: 128x128 pixel)",
+      options: [
+        "a. 29 cabinet",
+        "b. 39 cabinet",
+        "c. 49 cabinet"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Số lượng cabinet tối đa một lộ điện có thể cấp nguồn là bao nhiêu?",
+      options: [
+        "a. 18-20 cabinet",
+        "b. 12-24 cabinet",
+        "c. 27-30 cabinet"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Trong phần mềm điều khiển HI-SOFT, mật khẩu để đăng nhập tài khoản nâng cao là gì?",
+      options: [
+        "a. 888",
+        "b. 999",
+        "c. 666"
+      ],
+      answer: "c"
+    },
+    {
+      question: "Mỗi cổng mạng của bộ xử lý hình ảnh có thể điều khiển tối đa bao nhiêu điểm ảnh?",
+      options: [
+        "a. 550,000 điểm ảnh",
+        "b. 650,000 điểm ảnh",
+        "c. 750,000 điểm ảnh"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Một hệ thống màn hình LED P3.9 ngoài trời, kích thước 88 m2 (Cao 8m x Rộng 11m), cần dùng bao nhiêu lộ mạng và lộ điện?",
+      options: [
+        "a. 10 lộ mạng, 16 lộ điện",
+        "b. 11 lộ mạng 18 lộ điện",
+        "c. 12 lộ mạng, 16 lộ điện"
+      ],
+      answer: "b"
+    }
+  ],
+  mcu: [
+    {
+      question: "MCU PEXIP là MCU dạng nào sau đây ?",
+      options: [
+        "a. Là MCU cứng chuyên dụng",
+        "b. Là MCU được cài đặt trực tiếp lên Máy chủ vật lý",
+        "c. Là MCU ảo hóa được cài đặt trên nền tảng ảo hóa"
+      ],
+      answer: "c"
+    },
+    {
+      question: "MCU PEXIP của hệ thống THCĐ sử dụng nền tảng ảo hóa nào sau đây ?",
+      options: [
+        "a. Sử dụng nền tảng ảo hóa Hyper-V (Windows Microsoft )",
+        "b. Sử dụng nền tảng ảo hóa Vmware Vsphere",
+        "c. Sử dụng nền tảng ảo hóa KVM/ Proxmox"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Máy chủ hãng nào được sử dụng để cài đặt nền tảng ảo hóa và MCU PEXIP của hệ thống THCĐ ?",
+      options: [
+        "a. HP",
+        "b. FUJITSU",
+        "c. DELL"
+      ],
+      answer: "c"
+    },
+    {
+      question: "Có bao nhiêu máy ảo được cài đặt trên nền tảng ảo hóa ?",
+      options: [
+        "a. 2 máy ảo : PEXIP Management Node , PEXIP Trancoding Conference Node",
+        "b. 3 máy ảo : NTP Server, PEXIP Management Node , PEXIP Trancoding Conference Node",
+        "c. 4 máy ảo : Windows Server, NTP Server, PEXIP Management Node , PEXIP Trancoding Conference Node"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Máy chủ ảo PEXIP Management có nhiệm vụ chức năng nào sau đây ?",
+      options: [
+        "a. Xử lý các tín hiệu đa điểm: Video, Audio, Content,…",
+        "b. Quản lý, định nghĩa hệ thống, Tạo phòng họp, …",
+        "c. Là máy chủ đồng bộ thời gian"
+      ],
+      answer: "b"
+    },
+    {
+      question: "MCU PEXIP hỗ trợ kết nối cuộc gọi bằng những hình thức nào sau đây",
+      options: [
+        "a. Cuộc gọi từ trình duyệt Web",
+        "b. Cuộc gọi từ phần mềm cài đặt trên máy tính sử dụng giao thức H.323/SIP",
+        "c. Cuộc gọi từ các thiết bị đầu cuối chuyên dụng sử dụng giao thức H.323/SIP",
+        "d. Tất các các hình thức ở mục trên"
+      ],
+      answer: "d"
+    },
+    {
+      question: "MCU PEXIP hỗ trợ giao thức kết nối nào sau đây ?",
+      options: [
+        "a. SIP",
+        "b. H.323",
+        "c. WebRTC",
+        "d. Tất các các hình thức trên"
+      ],
+      answer: "d"
+    },
+    {
+      question: "MCU PEXIP hỗ trợ bao nhiêu kiểu Bố cục khung hình (Layout) mặc định",
+      options: [
+        "a. Dưới 10 kiểu Layout mặc định",
+        "b. Khoảng 10-15 kiểu Layout mặc định",
+        "c. Khoảng 15-30 kiểu Layout mặc định",
+        "d. Trên 30 kiểu Layout mặc định"
+      ],
+      answer: "b"
+    },
+    {
+      question: "MCU PEXIP có tùy chọn được Bố cục khung hình  Layout riêng cho từng điểm cầu không ( Personal Layout) ?",
+      options: [
+        "a. Có",
+        "b. Không"
+      ],
+      answer: "b"
+    },
+    {
+      question: "MCU PEXIP có phần mềm để điều khiển cuộc gọi không ?",
+      options: [
+        "a. Có",
+        "b. Không"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Phần mềm điều khiển MCU  có thể lựa chọn được IP để điều khiển MCU PEXIP không ?",
+      options: [
+        "a. Có",
+        "b. Không",
+        "c. Chỉ chọn IP MCU PEXIP có sẵn trong danh sách"
+      ],
+      answer: "c"
+    },
+    {
+      question: "MCU PEXIP của hệ thống THCĐ cấp cho đơn vị  có thể tạo bao nhiêu phòng họp đồng thời ?",
+      options: [
+        "a. 1",
+        "b. 2",
+        "c. 3",
+        "d. 4"
+      ],
+      answer: "b"
+    },
+    {
+      question: "MCU PEXIP của hệ thống THCĐ cấp cho đơn vị  cho phép bao nhiêu điểm cầu kết nối đồng thời ?",
+      options: [
+        "a. 10",
+        "b. 15",
+        "c. 30",
+        "d. 60"
+      ],
+      answer: "b"
+    },
+    {
+      question: "VCS Polycom Group 500 hỗ trợ bao nhiêu cổng HDMI xuất hình ảnh ra ?",
+      options: [
+        "a. 1",
+        "b. 2",
+        "c. 3",
+        "d. 4"
+      ],
+      answer: "b"
+    },
+    {
+      question: "VCS Polycom Group 500 có thể sử dụng Máy quay cắm với nó qua cổng nào ?",
+      options: [
+        "a. HDMI",
+        "b. HDCI",
+        "c. Display Port",
+        "d. USB"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Mặc định cổng HDMI In trên VCS Polycom Group 500 sẽ truyền luồng tín hiệu nào ?",
+      options: [
+        "a. People ( Camera)",
+        "b. Content (Nội dung)",
+        "c. Không truyền luồng tín hiệu nào"
+      ],
+      answer: "b"
+    },
+    {
+      question: "VCS Polycom Group 500 sử dụng giao thức nào để kết nối ?",
+      options: [
+        "a. H.323,SIP",
+        "b. WebRTC",
+        "c. Giao thức khác",
+        "d. Giao thức ở mục a. và b."
+      ],
+      answer: "a"
+    },
+    {
+      question: "VCS Polycom Group 500 kết nối âm thanh ngoài qua cổng nào ?",
+      options: [
+        "a. 3.5 mm",
+        "b. RCA ( hoa sen)",
+        "c. 6.5 mm",
+        "d. Canon (XLR)"
+      ],
+      answer: "a"
+    },
+    {
+      question: "VCS Polycom Group 500 có mấy cổng mạng RJ45 ?",
+      options: [
+        "a. 1",
+        "b. 2",
+        "c. 3",
+        "d. 4"
+      ],
+      answer: "a"
+    },
+    {
+      question: "VCS Polycom Group 500 mặc định kết nối được mấy cuộc gọi đồng thời ?",
+      options: [
+        "a. 1 cuộc gọi video",
+        "b. 1 cuộc  gọi video 1 cuộc gọi audio",
+        "c. 2 cuộc gọi audio 1 cuộc gọi video",
+        "d. 1 cuộc gọi audio 2 cuộc gọi video"
+      ],
+      answer: "b"
+    }
+  ],
+  truyendan: [
+    {
+      question: "Hệ thống Camera IP kết nối trực tiếp vào Switch nào.",
+      options: [
+        "a. Swithch 9200 số 1 của tủ 2",
+        "b. Swithch 9200 số 2 của tủ 2",
+        "c. Swithch 9300 của tủ 2"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Dữ liệu luồng từ camera vào phần mềm là luồng nào",
+      options: [
+        "a. Stream 1",
+        "b. Stream 2",
+        "c. Stream 3"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Máy tính nào sẽ kết nối đến bàn điều khiển PTZ để điều khiển",
+      options: [
+        "a. Máy chủ",
+        "b. Máy tính client",
+        "c. Máy tính cài phần mềm JoystickServiceMonitor có cấu hình kết nối đến bàn PTZ"
+      ],
+      answer: "c"
+    },
+    {
+      question: "Chỉnh thông số tên camera, ngày giờ và hiển thị nó lên camera sẽ chỉnh ở đâu",
+      options: [
+        "a. Camera",
+        "b. Phần mềm",
+        "c. Tool cấu hình"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Phần mềm để cấu hình và xem camera là gì:",
+      options: [
+        "a. VIMonitorPlus",
+        "b. JoystickServiceMonitor",
+        "c. Service Manager"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Bạn sẽ add camera theo model nào:",
+      options: [
+        "a. ONVIF",
+        "b. ManualFacturer: Panasonic / Model: WV-X6533L",
+        "c. Dùng cách khác"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Cú pháp chọn Camera để điều khiển trên bàn điều khiển PTZ là:",
+      options: [
+        "a. [ ID camera ] + CAM/SET sau đó điều khiển camera.",
+        "b. Chỉ cần nhập [ ID camera ] sau đó điều khiển camera.",
+        "c. 0 + [ MON ] + [ ID camera ] + CAM/SET sau đó điều khiển camera."
+      ],
+      answer: "c"
+    },
+    {
+      question: "Khi khai báo bàn điều khiển PTZ sẽ chọn model nào sau đây:",
+      options: [
+        "a. WV-CU950",
+        "b. WV-CU980",
+        "c. WV-CU980 (China)"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Chế độ zoom của camera phóng to lên được bao nhiêu lần",
+      options: [
+        "a. 30",
+        "b. 60",
+        "c. 90"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Sau khi khai báo bàn điều khiển PTZ vào phần mềm cần tắt tường lửa hoặc mở port nào để kết nối máy tính đến bàn điều khiển PTZ",
+      options: [
+        "a. 7400",
+        "b. 7401",
+        "c. 7402"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Điện áp từ bộ Adaptor cấp cho Camera IP là bao nhiêu?",
+      options: [
+        "a. 12 VDC",
+        "b. 20 VAC",
+        "c. 220 VAC"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Hình ảnh của Camera IP đưa và hệ thống xử lý hình ảnh GO bằng cách nào?",
+      options: [
+        "a. Đường Sub stream",
+        "b. Xuất hình từ HDMI của Laptop điều khiển",
+        "c. Có thể sử dụng cả hai phương án trên"
+      ],
+      answer: "c"
+    }
+  ],
+  router: [
+    {
+      question: "Để máy quay điều chỉnh nhiệt độ màu thích ứng theo môi trường thì chúng ta chọn chế độ nào?",
+      options: [
+        "a. ATW",
+        "b. AWB",
+        "c. Preset"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Vòng Iris trên ống kính máy quay dùng để thay đổi thông số:",
+      options: [
+        "a. Khẩu độ",
+        "b. Lấy nét",
+        "c. Độ thu phóng"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Bộ Video router có ngõ vào 5 là độ phân giải 1080p30. Ngõ ra 10 được đinh tuyến chọn ngõ vào 5. Vậy độ phân giải của ngõ ra 10 sẽ là:",
+      options: [
+        "a. 1080p60",
+        "b. 1080i60",
+        "c. 1080p30"
+      ],
+      answer: "c"
+    },
+    {
+      question: "Bộ Multiview 16 có ngõ vào SDI 3 đang có tín hiệu video, ngõ vào SDI 5 không có tín hiệu. Tại ô hiển thị số 5 (view 5) chọn hiển thị là ngõ vào 3 (Input 3), lúc này ô hiển thị số 5 có hình. Vậy tín hiệu loop của ngõ vào SDI 5 sẽ là tín hiệu nào?",
+      options: [
+        "a. Tín hiệu của ô hiển thị số 5",
+        "b. Tín hiệu của ngõ vào SDI 5",
+        "c. Tín hiệu của ngõ vào SDI 3"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Bộ xử lý đồ hoạ đa cửa sổ MWP hỗ trợ xuất bao nhiêu ngõ ra?",
+      options: [
+        "a. 1",
+        "b. 2",
+        "c. 4"
+      ],
+      answer: "c"
+    },
+    {
+      question: "Các phát biểu nào không đúng về bộ chuyển đổi SDI sang quang ATEM camera converter",
+      options: [
+        "a. Chuyển đổi trực tiếp từ HDMI sang SDI",
+        "b. Chuyển đổi tín hiệu HDMI hoặc SDI sang quang",
+        "c. Chuyển đổi tín hiệu quang sáng HDMI hoặc SDI"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Bộ xử lý đồ hoạ MWP trong tủ 01 hỗ trợ các định dạng tín hiệu nào:",
+      options: [
+        "a. HDMI, SDI, IP stream, Video MP4",
+        "b. DVI, HDMI, Ảnh PNG, Video MP4",
+        "c. SDI, Video MP4, Ảnh PNG, Word"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Để xuất video từ tủ 01 sang bộ điều khiển LED, chúng ta sử dụng kết nối nào?",
+      options: [
+        "a. Kết nối SDI từ Video router 20x20",
+        "b. Kết nối HDMI từ VCS",
+        "c. Kết nối HDMI từ Multiview 16"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Các cổng HDMI vào trực tiếp thiết bị xử lý đồ họa GO có hiển thị trên màn hình Multiview hay không?",
+      options: [
+        "a. Có",
+        "b. Không",
+        "c. Chỉ hiện 2/4 tín hiệu"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Có bao nhiêu cổng SDI đưa tín hiệu vào thiết bị xử lý đồ họa GO",
+      options: [
+        "a. 10",
+        "b. 12",
+        "c. 20"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Theo thiết kế, cổng vào 17-20 của Video Router nhận tín hiệu từ thiết bị gì?",
+      options: [
+        "a. Bộ chuyển đổi HDMI -SDI",
+        "c. Từ Panel SDI phía sau tủ",
+        "d. Từ các bộ chuyển đổi quang-SDI"
+      ],
+      answer: "a"
+    },
+    {
+      question: "Camera cơ động có thể đưa tín hiệu về tủ 1 qua đường truyền nào?",
+      options: [
+        "a. Cáp quang",
+        "b. Cáp SDI",
+        "c. Cả hai phương án trên"
+      ],
+      answer: "c"
+    },
+    {
+      question: "Màn hình Multiview hiển thị được các tín hiệu tương ứng với các cổng vào nào trên Router",
+      options: [
+        "a. Cổng 1 đến 10",
+		"b. Cổng 1 đến 20",
+        "c. Cổng 1 đến 16"
+      ],
+      answer: "c"
+    },
+    {
+      question: "Màn hình giám sát cắm vào cổng OUT1 của Video Router, lệnh kiểm tra tín hiệu vào số 17 thực hiện bấm trên Video Router như thế nào?",
+      options: [
+        "a. IN 17, OUT1",
+        "b. OUT1, IN17",
+        "c. OUT17, IN1"
+      ],
+      answer: "b"
+    },
+    {
+      question: "Tín hiệu hình ảnh đầu ra của VCS đưa vào Video Router bằng cách nào?",
+      options: [
+        "a. Qua các bộ biến đổi HDMI-SDI",
+        "b. Cắm trực tiếp HDMI vào Router",
+        "c. Cắm trực tiếp HDMI vào HDMI IN của bộ xử lý hình ảnh GO"
+      ],
+      answer: "a"
+    }
+  ]
+};
+
+let selectedQuestions = [], isTest = false, startTime;
+
+function switchTab(tab) {
+  document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+  document.querySelectorAll(".tab-btn")[tab === 'practice' ? 0 : 1].classList.add("active");
+  document.getElementById("practice-tab").classList.toggle("hidden", tab !== 'practice');
+  document.getElementById("test-tab").classList.toggle("hidden", tab !== 'test');
+  document.getElementById("quiz-screen").classList.add("hidden");
+  document.getElementById("result-screen").classList.add("hidden");
+}
+
+function startPractice() {
+  const topic = document.getElementById("topic-select").value;
+  if (!topic) return alert("Chọn chủ đề để bắt đầu!");
+  selectedQuestions = allQuestions[topic];
+  isTest = false;
+  beginQuiz();
+}
+
+function startTest() {
+  let combined = [];
+  Object.values(allQuestions).forEach(arr => combined.push(...arr));
+  selectedQuestions = shuffle(combined).slice(0, 50).map(q => ({ ...q, options: shuffle(q.options) }));
+  isTest = true;
+  beginQuiz();
+  startTimer(90 * 60);
+}
+
+function beginQuiz() {
+  document.getElementById("quiz-form").innerHTML = "";
+  document.getElementById("quiz-screen").classList.remove("hidden");
+  document.getElementById("timer").style.display = isTest ? "block" : "none";
+  document.getElementById("result-screen").classList.add("hidden");
+
+  const labels = ['a', 'b', 'c', 'd'];
+
+  selectedQuestions.forEach((q, i) => {
+    const block = document.createElement("div");
+    block.className = "question-block";
+
+    // Shuffle options
+    const shuffled = shuffle([...q.options]);
+
+    block.innerHTML = `<strong>Câu ${i + 1}: ${q.question}</strong><br>` +
+      shuffled.map((opt, idx) => `
+        <label class="option">
+          <input type="radio" name="q${i}" value="${opt.charAt(0)}"> ${labels[idx]}. ${opt.slice(3)}
+        </label>
+      `).join("");
+
+    document.getElementById("quiz-form").appendChild(block);
+  });
+}
+
+
+function submitQuiz() {
+  clearInterval(startTime); // Nếu có sử dụng đồng hồ đếm
+
+  const form = document.getElementById("quiz-form");
+  const resultGrid = document.getElementById("result-grid");
+  const resultDiv = document.getElementById("review");
+  const scoreBox = document.getElementById("score");
+
+  resultGrid.innerHTML = "";
+  resultDiv.innerHTML = "";
+
+  let score = 0;
+
+  selectedQuestions.forEach((q, i) => {
+    const selected = form.querySelector(`input[name=q${i}]:checked`);
+    const userAns = selected ? selected.value : "-";
+    const isCorrect = userAns === q.answer;
+    if (isCorrect) score++;
+
+    // Tạo ô kết quả
+    const box = document.createElement("div");
+    box.className = `result-box ${isCorrect ? 'correct-box' : 'incorrect-box'}`;
+    box.textContent = i + 1;
+    box.onclick = () => {
+      document.querySelectorAll('.question-block').forEach(el => el.classList.add('hidden'));
+      const target = document.getElementById(`question-${i}`);
+      if (target) {
+        target.classList.remove('hidden');
+        window.scrollTo({ top: target.offsetTop - 20, behavior: 'smooth' });
+      }
+    };
+    resultGrid.appendChild(box);
+
+    // Tạo phần hiển thị lại câu hỏi + tô màu
+    const block = document.createElement("div");
+    block.className = "question-block hidden";
+    block.id = `question-${i}`;
+    block.innerHTML = `<strong>Câu ${i + 1}: ${q.question}</strong><br>` +
+      q.options.map(opt => {
+        const key = opt[0];
+        const text = opt.slice(3);
+        const isUserWrong = userAns === key && key !== q.answer;
+        const isCorrectAns = key === q.answer;
+        let colorClass = '';
+        if (isCorrectAns) colorClass = 'correct';
+        if (isUserWrong) colorClass = 'incorrect';
+        return `<div class="${colorClass}">${key.toUpperCase()}. ${text}</div>`;
+      }).join("");
+    resultDiv.appendChild(block);
+  });
+
+  // Hiển thị kết quả tổng
+  const diem = ((score / selectedQuestions.length) * 10).toFixed(2);
+  scoreBox.innerText = `Bạn đúng ${score}/${selectedQuestions.length} câu. Điểm: ${diem}`;
+  document.getElementById("quiz-screen").classList.add("hidden");
+  document.getElementById("result-screen").classList.remove("hidden");
+}
+
+
+function showAllQuestions() {
+  document.querySelectorAll('.question-block').forEach(el => el.classList.remove('hidden'));
+}
+
+
+function startTimer(duration) {
+  let time = duration;
+  const timer = document.getElementById("timer");
+  startTime = setInterval(() => {
+    let min = String(Math.floor(time / 60)).padStart(2, '0');
+    let sec = String(time % 60).padStart(2, '0');
+    timer.innerText = `⏰ Thời gian còn lại: ${min}:${sec}`;
+    if (--time < 0) submitQuiz();
+  }, 1000);
+}
+
+function shuffle(arr) {
+  return arr.sort(() => Math.random() - 0.5);
+}
+
+</script>
+
+
+</div></body></html>
