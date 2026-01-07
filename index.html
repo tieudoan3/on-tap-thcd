@@ -1111,7 +1111,7 @@ function startTest() {
   selectedQuestions = shuffle(combined).slice(0, 50).map(q => ({ ...q, options: shuffle(q.options) }));
   isTest = true;
   beginQuiz();
-  startTimer(90 * 60);
+  startTimer(15 * 60);
 }
 
 function beginQuiz() {
