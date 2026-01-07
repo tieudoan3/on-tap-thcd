@@ -1108,7 +1108,21 @@ function startPractice() {
 function startTest() {
   let combined = [];
   Object.values(allQuestions).forEach(arr => combined.push(...arr));
-  selectedQuestions = shuffle(combined).slice(0, 50).map(q => ({ ...q, options: shuffle(q.options) }));
+
+  // ❌ LOẠI CÂU TRÙNG THEO QUESTION
+  const uniqueMap = new Map();
+  combined.forEach(q => {
+    if (!uniqueMap.has(q.question)) {
+      uniqueMap.set(q.question, q);
+    }
+  });
+
+  const uniqueQuestions = Array.from(uniqueMap.values());
+
+  selectedQuestions = shuffle(uniqueQuestions)
+    .slice(0, 50)
+    .map(q => ({ ...q, options: shuffle(q.options) }));
+
   isTest = true;
   beginQuiz();
   startTimer(15 * 60);
